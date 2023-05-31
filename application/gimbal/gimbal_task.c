@@ -317,6 +317,7 @@ uint8_t gimbal_get_work_mode(void)
 
 #define PITCH_MOVE_DZ 120
 
+uint32_t spin_t0 = 0;
 /**
  * @brief  normal status handle
  * @param
@@ -344,6 +345,11 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
             DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
             pit_delta = local_ch4 * 0.5f;              // left y
             yaw_delta = -(float)p_info->ch1 * 0.0015f; // right x
+        }
+
+        if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK)
+        {
+            yaw_delta += SPIN_OFFSET * GIMBAL_PERIOD;
         }
 
         gimbal_set_pitch_delta(p_gimbal, pit_delta);

@@ -5,7 +5,7 @@
 //#define ICRA2019
 #define Y_MOVE_DZ 0
 #define SPIN_SPEED -200
-
+#define SPIN_OFFSET 0.00094
 
 #endif
 
