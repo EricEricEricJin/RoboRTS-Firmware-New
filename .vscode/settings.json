@@ -12,7 +12,8 @@
         "easyflash.h": "c",
         "chassis_task.h": "c",
         "protocol.h": "c",
-        "sys.h": "c"
+        "sys.h": "c",
+        "gimbal_cmd.h": "c"
     },
     "cortex-debug.openocdPath": "D:\\OPENOCD\\BIN\\OPENOCD.EXE"
 }

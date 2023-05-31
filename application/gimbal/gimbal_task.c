@@ -376,10 +376,10 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
     //     }
     // }
 
-    if (rc_device_get_state(p_rc, RC_S2_DOWN2MID) == E_OK)
-    {
-        gimbal_set_yaw_angle(p_gimbal, 0, 0);
-    }
+    // if (rc_device_get_state(p_rc, RC_S2_DOWN2MID) == E_OK)
+    // {
+    //     gimbal_set_yaw_angle(p_gimbal, 0, 0);
+    // }
 
     if (rc_device_get_state(p_rc, RC_S2_DOWN) == E_OK)
     {
