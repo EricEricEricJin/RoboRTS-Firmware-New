@@ -307,7 +307,7 @@ static int32_t shoot_fric_ctrl(struct shoot *shoot)
 
     shoot_get_fric_speed(shoot, &(shoot->fric_spd[0]), &(shoot->fric_spd[1]));
 
-    // #define FRIC_SPEED_ADJ
+    #define FRIC_SPEED_ADJ
     
     #ifndef FRIC_SPEED_ADJ
 

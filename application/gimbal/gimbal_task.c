@@ -315,7 +315,7 @@ uint8_t gimbal_get_work_mode(void)
     return gimbal_mode;
 }
 
-#define PITCH_MOVE_DZ 120
+#define PITCH_MOVE_DZ 0
 
 uint32_t spin_t0 = 0;
 /**
@@ -392,8 +392,8 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
         set_gimbal_sdk_mode(GIMBAL_SDK_ON);
         gimbal_set_yaw_mode(p_gimbal, ENCODER_MODE);
         // gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
-        offline_event_enable(OFFLINE_MANIFOLD2_HEART);
-        offline_event_enable(OFFLINE_CONTROL_CMD);
+        // offline_event_enable(OFFLINE_MANIFOLD2_HEART);
+        // offline_event_enable(OFFLINE_CONTROL_CMD);
     }
     else
     {

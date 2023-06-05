@@ -25,6 +25,7 @@
 #include "offline_service.h"
 
 #include "appcfg.h"
+#include "log.h"
 
 uint8_t gimbal_sdk_state = GIMBAL_SDK_OFF;
 uint8_t gimbal_heart_state = GIMBAL_HEART_OFF;
@@ -72,6 +73,10 @@ int32_t gimbal_angle_ctrl(uint8_t *buff, uint16_t len)
 
         gimbal_t p_gimbal;
         p_gimbal = get_gimbal();
+
+        log_i("pitch_mode: %d", p_cmd->ctrl.bit.pitch_mode);
+        log_i("pitch_value: %d", p_cmd->pitch);
+        
 
         if (p_cmd->ctrl.bit.pitch_mode == 0)
         {
