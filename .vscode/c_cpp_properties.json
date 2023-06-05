@@ -31,8 +31,7 @@
         "components/protocol",
         "components/referee",
         "components/soft_timer",
-        "components/support",
-        "components/systemview"
+        "components/support"
       ],
       "defines": [
         "ARM_MATH_CM4",

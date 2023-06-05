@@ -149,11 +149,7 @@ components/soft_timer/period.c \
 components/soft_timer/soft_timer.c \
 components/support/fifo.c \
 components/support/mem_mang4.c \
-components/support/mf_crc.c \
-components/systemview/SEGGER_RTT.c \
-components/systemview/SEGGER_SYSVIEW.c \
-components/systemview/SEGGER_SYSVIEW_Config_FreeRTOS.c \
-components/systemview/SEGGER_SYSVIEW_FreeRTOS.c
+components/support/mf_crc.c
 
 
 CPP_SOURCES = \
@@ -255,8 +251,7 @@ C_INCLUDES =  \
 -Icomponents/protocol \
 -Icomponents/referee \
 -Icomponents/soft_timer \
--Icomponents/support \
--Icomponents/systemview
+-Icomponents/support
 
 
 

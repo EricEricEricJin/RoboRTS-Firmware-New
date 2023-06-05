@@ -32,7 +32,7 @@
 #include "chassis_app.h"
 #include "gimbal_app.h"
 
-#include "SEGGER_SYSVIEW.h"
+// #include "SEGGER_SYSVIEW.h"
 
 #include "log.h"
 
@@ -90,7 +90,7 @@ void services_task(void const *argument)
 {
     /* init code for USB_DEVICE */
     MX_USB_DEVICE_Init();
-    SEGGER_SYSVIEW_Conf();
+    // SEGGER_SYSVIEW_Conf();
     hw_init();
     sys_task();
     task_init();
