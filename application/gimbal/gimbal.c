@@ -126,14 +126,18 @@ int32_t gimbal_set_pitch_speed(struct gimbal *gimbal, float pitch)
 {
     device_assert(gimbal != NULL);
 
+    // Bug: Sensor error accumulated.
+    // Fix: Use add the delta with target, not measured. 
+    // DJI DUCK YOU!
     if (gimbal->mode.bit.pitch_mode == GYRO_MODE)
     {
-        gimbal_set_pitch_angle(gimbal, gimbal->sensor.gyro_angle.pitch + pitch);
+        // gimbal_set_pitch_angle(gimbal, gimbal->sensor.gyro_angle.pitch + pitch);
+        gimbal_set_pitch_angle(gimbal, gimbal->gyro_target_angle.pitch + pitch);
         log_i("new pitch angle (gyro): %d", (int)(gimbal->sensor.gyro_angle.pitch + pitch));
     }
     else
     {
-        gimbal_set_pitch_angle(gimbal, gimbal->ecd_angle.pitch + pitch);
+        gimbal_set_pitch_angle(gimbal, gimbal->ecd_target_angle.pitch + pitch);
         log_i("new pitch angle (ecd): %d", (int)(gimbal->ecd_angle.pitch + pitch));
     }
 
@@ -146,11 +150,11 @@ int32_t gimbal_set_yaw_speed(struct gimbal *gimbal, float yaw)
 
     if (gimbal->mode.bit.yaw_mode == GYRO_MODE)
     {
-        gimbal_set_yaw_angle(gimbal, gimbal->sensor.gyro_angle.yaw + yaw, YAW_FASTEST);
+        gimbal_set_yaw_angle(gimbal, gimbal->gyro_target_angle.yaw + yaw, YAW_FASTEST);
     }
     else
     {
-        gimbal_set_yaw_angle(gimbal, gimbal->ecd_angle.yaw + yaw, 0);
+        gimbal_set_yaw_angle(gimbal, gimbal->ecd_target_angle.yaw + yaw, 0);
     }
 
     return E_OK;
