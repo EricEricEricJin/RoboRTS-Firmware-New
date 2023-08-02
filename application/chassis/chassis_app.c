@@ -23,6 +23,8 @@
 #include "board.h"
 #include "easyflash.h"
 
+#include "log.h"
+
 osThreadId chassis_task_t;
 
 static void chassis_can2_callback(uint16_t std_id, uint8_t *data, uint8_t dlc);
@@ -47,43 +49,43 @@ void referee_data_send2pc(uint16_t cmd_id, uint8_t *pdata, uint16_t len);
 struct protocol_send_cfg_obj chassis_send_cfg_table[] = {0};
 
 struct protocol_recv_cmd_obj chassis_recv_cmd_table[] =
-{
-    /* CMD | callback function */
-    {CMD_STUDENT_DATA, student_data_transmit},
-    {CMD_PUSH_GIMBAL_INFO, follow_angle_info_rcv},
-    {CMD_SET_CHASSIS_SPEED, chassis_speed_ctrl},
-    {CMD_SET_CHASSIS_SPD_ACC, chassis_spd_acc_ctrl},
-    {CMD_MANIFOLD2_HEART, chassis_manifold_heart},
+    {
+        /* CMD | callback function */
+        {CMD_STUDENT_DATA, student_data_transmit},
+        {CMD_PUSH_GIMBAL_INFO, follow_angle_info_rcv},
+        {CMD_SET_CHASSIS_SPEED, chassis_speed_ctrl},
+        {CMD_SET_CHASSIS_SPD_ACC, chassis_spd_acc_ctrl},
+        {CMD_MANIFOLD2_HEART, chassis_manifold_heart},
 };
 
 struct offline_obj chassis_offline_table[] =
-{
-    /* event | enable | beep_times | offline time | offline_first_func| offline_func | online_first_func | online_func */
-    {SYSTEM_PROTECT, ENABLE, 0, 0, 0, 0, chassis_offline, chassis_online, NULL},
+    {
+        /* event | enable | beep_times | offline time | offline_first_func| offline_func | online_first_func | online_func */
+        {SYSTEM_PROTECT, ENABLE, 0, 0, 0, 0, chassis_offline, chassis_online, NULL},
 
-    {OFFLINE_DBUS, ENABLE, OFFLINE_ERROR_LEVEL, 0, 100, NULL, NULL, NULL, NULL},
+        {OFFLINE_DBUS, ENABLE, OFFLINE_ERROR_LEVEL, 0, 100, NULL, NULL, NULL, NULL},
 
-    {OFFLINE_CHASSIS_MOTOR1, ENABLE, OFFLINE_ERROR_LEVEL, 1, 100, NULL, NULL, NULL, NULL},
-    {OFFLINE_CHASSIS_MOTOR2, ENABLE, OFFLINE_ERROR_LEVEL, 2, 100, NULL, NULL, NULL, NULL},
-    {OFFLINE_CHASSIS_MOTOR3, ENABLE, OFFLINE_ERROR_LEVEL, 3, 100, NULL, NULL, NULL, NULL},
-    {OFFLINE_CHASSIS_MOTOR4, ENABLE, OFFLINE_ERROR_LEVEL, 4, 100, NULL, NULL, NULL, NULL},
-    {OFFLINE_MANIFOLD2_HEART, DISABLE, OFFLINE_WARNING_LEVEL, BEEP_DISABLE, 700, NULL, chassis_heart_offline, NULL, chassis_heart_online},
-    {OFFLINE_CONTROL_CMD, ENABLE, OFFLINE_WARNING_LEVEL, BEEP_DISABLE, 700, NULL, chassis_control_offline, NULL, chassis_control_online},
+        {OFFLINE_CHASSIS_MOTOR1, ENABLE, OFFLINE_ERROR_LEVEL, 1, 100, NULL, NULL, NULL, NULL},
+        {OFFLINE_CHASSIS_MOTOR2, ENABLE, OFFLINE_ERROR_LEVEL, 2, 100, NULL, NULL, NULL, NULL},
+        {OFFLINE_CHASSIS_MOTOR3, ENABLE, OFFLINE_ERROR_LEVEL, 3, 100, NULL, NULL, NULL, NULL},
+        {OFFLINE_CHASSIS_MOTOR4, ENABLE, OFFLINE_ERROR_LEVEL, 4, 100, NULL, NULL, NULL, NULL},
+        {OFFLINE_MANIFOLD2_HEART, DISABLE, OFFLINE_WARNING_LEVEL, BEEP_DISABLE, 700, NULL, chassis_heart_offline, NULL, chassis_heart_online},
+        {OFFLINE_CONTROL_CMD, ENABLE, OFFLINE_WARNING_LEVEL, BEEP_DISABLE, 700, NULL, chassis_control_offline, NULL, chassis_control_online},
 
-    {OFFLINE_GIMBAL_INFO, ENABLE, APP_PROTECT_LEVEL, 0, 700, NULL, gimbal_info_offline, NULL, gimbal_info_online},
+        {OFFLINE_GIMBAL_INFO, ENABLE, APP_PROTECT_LEVEL, 0, 700, NULL, gimbal_info_offline, NULL, gimbal_info_online},
 };
 
 struct route_obj chassis_route_table[] =
-{
-    {GIMBAL_ADDRESS, "can1_0x500_to_0x600"},
-    {MANIFOLD2_ADDRESS, "usb"},
+    {
+        {GIMBAL_ADDRESS, "can1_0x500_to_0x600"},
+        {MANIFOLD2_ADDRESS, "usb"},
 };
 
 /**
-  * @brief  chassis app init
-  * @param
-  * @retval void
-  */
+ * @brief  chassis app init
+ * @param
+ * @retval void
+ */
 void chassis_app_init(void)
 {
     struct app_manage *app;
@@ -121,10 +123,10 @@ void chassis_app_init(void)
 }
 
 /**
-  * @brief  chassis can2 receive interupt
-  * @param
-  * @retval void
-  */
+ * @brief  chassis can2 receive interupt
+ * @param
+ * @retval void
+ */
 void chassis_can2_callback(uint16_t std_id, uint8_t *data, uint8_t dlc)
 {
     switch (std_id)
@@ -146,10 +148,10 @@ void chassis_can2_callback(uint16_t std_id, uint8_t *data, uint8_t dlc)
 
 uint32_t key_time_now = 0;
 /**
-  * @brief  chassis adjust key
-  * @param
-  * @retval void
-  */
+ * @brief  chassis adjust key
+ * @param
+ * @retval void
+ */
 void chassis_user_key_handle(void)
 {
     MASTER_INT_DISABLE();
@@ -175,10 +177,10 @@ void chassis_dbus_rx_complete(void)
 }
 
 /**
-  * @brief  chassis protection
-  * @param
-  * @retval void
-  */
+ * @brief  chassis protection
+ * @param
+ * @retval void
+ */
 void chassis_offline(void)
 {
     chassis_t p_chassis;
@@ -187,10 +189,10 @@ void chassis_offline(void)
 }
 
 /**
-  * @brief  chassis enable
-  * @param
-  * @retval void
-  */
+ * @brief  chassis enable
+ * @param
+ * @retval void
+ */
 void chassis_online(void)
 {
     chassis_t p_chassis;
@@ -245,7 +247,55 @@ void gimbal_info_online(void)
     return;
 }
 
+typedef __packed struct
+{
+    uint16_t chassis_volt;
+    uint16_t chassis_current;
+    float chassis_power;
+    uint16_t chassis_power_buffer;
+    uint16_t shooter_id1_17mm_cooling_heat;
+    uint16_t shooter_id2_17mm_cooling_heat;
+    uint16_t shooter_id1_42mm_cooling_heat;
+} ext_power_heat_data_t;
+
+typedef __packed struct
+{
+    uint8_t robot_id;
+    uint8_t robot_level;
+    uint16_t remain_HP;
+    uint16_t max_HP;
+    uint16_t shooter_id1_17mm_cooling_rate;
+    uint16_t shooter_id1_17mm_cooling_limit;
+    uint16_t shooter_id1_17mm_speed_limit;
+    uint16_t shooter_id2_17mm_cooling_rate;
+    uint16_t shooter_id2_17mm_cooling_limit;
+    uint16_t shooter_id2_17mm_speed_limit;
+    uint16_t shooter_id1_42mm_cooling_rate;
+    uint16_t shooter_id1_42mm_cooling_limit;
+    uint16_t shooter_id1_42mm_speed_limit;
+    uint16_t chassis_power_limit;
+    uint8_t mains_power_gimbal_output : 1;
+    uint8_t mains_power_chassis_output : 1;
+    uint8_t mains_power_shooter_output : 1;
+} ext_game_robot_status_t;
+
+ext_power_heat_data_t power_data;
+ext_game_robot_status_t status_data;
+
 void referee_data_send2pc(uint16_t cmd_id, uint8_t *pdata, uint16_t len)
 {
+    if (cmd_id == 0x0202 && len == 16)
+    {
+        memcpy(&power_data, pdata, 16);
+        set_chassis_voltage(power_data.chassis_volt / 1000.0f);
+    }
+    else if (cmd_id == 0x0201 && len == 27)
+    {
+        memcpy(&status_data, pdata, 27);
+        set_power_limit(status_data.chassis_power_limit);
+    }
+
+    log_i("power=%.1f", power_data.chassis_power);
+    
     protocol_send(MANIFOLD2_ADDRESS, cmd_id + 0x4000, pdata, len);
 }

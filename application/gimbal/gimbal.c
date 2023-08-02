@@ -133,12 +133,12 @@ int32_t gimbal_set_pitch_speed(struct gimbal *gimbal, float pitch)
     {
         // gimbal_set_pitch_angle(gimbal, gimbal->sensor.gyro_angle.pitch + pitch);
         gimbal_set_pitch_angle(gimbal, gimbal->gyro_target_angle.pitch + pitch);
-        log_i("new pitch angle (gyro): %d", (int)(gimbal->sensor.gyro_angle.pitch + pitch));
+        // log_i("new pitch angle (gyro): %d", (int)(gimbal->sensor.gyro_angle.pitch + pitch));
     }
     else
     {
         gimbal_set_pitch_angle(gimbal, gimbal->ecd_target_angle.pitch + pitch);
-        log_i("new pitch angle (ecd): %d", (int)(gimbal->ecd_angle.pitch + pitch));
+        // log_i("new pitch angle (ecd): %d", (int)(gimbal->ecd_angle.pitch + pitch));
     }
 
     return E_OK;

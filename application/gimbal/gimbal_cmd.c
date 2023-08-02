@@ -74,8 +74,8 @@ int32_t gimbal_angle_ctrl(uint8_t *buff, uint16_t len)
         gimbal_t p_gimbal;
         p_gimbal = get_gimbal();
 
-        log_i("pitch_mode: %d", p_cmd->ctrl.bit.pitch_mode);
-        log_i("pitch_value: %d", p_cmd->pitch);
+        // log_i("pitch_mode: %d", p_cmd->ctrl.bit.pitch_mode);
+        // log_i("pitch_value: %d", p_cmd->pitch);
         
 
         if (p_cmd->ctrl.bit.pitch_mode == 0)

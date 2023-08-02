@@ -26,4 +26,8 @@ int32_t chassis_set_relative_angle(float angle);
 int32_t follow_angle_info_rcv(uint8_t *buff, uint16_t len);
 void set_follow_relative(float val);
 
+void set_power_limit(float pwr_limit);
+void set_chassis_voltage(float voltage);
+void set_chassis_power(float power);
+
 #endif // __CHASSIS_TASK_H__

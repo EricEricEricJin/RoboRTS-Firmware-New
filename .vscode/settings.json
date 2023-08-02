@@ -1,6 +1,6 @@
 {
-    "stm32-for-vscode.openOCDPath": "C:\\OPENOCD-20230111-0.12.0\\BIN\\OPENOCD.EXE",
-    "cortex-debug.armToolchainPath": "C:\\PROGRAM FILES (X86)\\GNU ARM EMBEDDED TOOLCHAIN\\10 2021.10\\BIN",
+    "stm32-for-vscode.openOCDPath": "D:\\OPENOCD\\BIN\\OPENOCD.EXE",
+    "cortex-debug.armToolchainPath": "D:\\GNU ARM EMBEDDED TOOLCHAIN\\10 2021.10\\BIN",
     "files.associations": {
         "board.h": "c",
         "ahrs_middleware.h": "c",
@@ -13,7 +13,9 @@
         "chassis_task.h": "c",
         "protocol.h": "c",
         "sys.h": "c",
-        "gimbal_cmd.h": "c"
+        "gimbal_cmd.h": "c",
+        "referee_system.h": "c",
+        "os_timer.h": "c"
     },
-    "cortex-debug.openocdPath": "C:\\OPENOCD-20230111-0.12.0\\BIN\\OPENOCD.EXE"
+    "cortex-debug.openocdPath": "D:\\OPENOCD\\BIN\\OPENOCD.EXE"
 }

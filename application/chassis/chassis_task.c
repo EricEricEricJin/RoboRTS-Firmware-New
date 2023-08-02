@@ -247,3 +247,17 @@ void set_follow_relative(float val)
 {
     follow_relative_angle = val;
 }
+
+void set_power_limit(float pwr_limit)
+{
+
+}
+void set_chassis_voltage(float voltage)
+{
+
+}
+void set_chassis_power(float power)
+{
+    
+}
+
