@@ -32,6 +32,8 @@
 
 #include "init.h"
 
+#include "log.h"
+
 /* patrol period time (ms) */
 #define GIMBAL_PERIOD 5
 /* gimbal back center time (ms) */
@@ -211,13 +213,10 @@ void gimbal_task(void const *argument)
         EventMsgProcess(&listSubs, 0);
         /* gyro data update */
         EventMsgGetLast(&nolistSubs, AHRS_MSG, &gimbal_gyro, NULL);
-#ifdef ICRA2019
-        gimbal_pitch_gyro_update(&gimbal, gimbal_gyro.roll * RAD_TO_DEG);
-        gimbal_rate_update(&gimbal, gimbal_gyro.gz * RAD_TO_DEG, -gimbal_gyro.gx * RAD_TO_DEG);
-#else
+
         gimbal_pitch_gyro_update(&gimbal, gimbal_gyro.pitch * RAD_TO_DEG);
         gimbal_rate_update(&gimbal, gimbal_gyro.gz * RAD_TO_DEG, gimbal_gyro.gy * RAD_TO_DEG);
-#endif
+
         switch (gimbal_mode)
         {
         case NORMAL_MODE:
@@ -325,32 +324,20 @@ uint32_t spin_t0 = 0;
  */
 void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struct rc_info *p_info)
 {
-#ifdef ICRA2019
-    p_info->ch4 = -p_info->ch4;
-#endif
     /* follow mode */
     if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK || rc_device_get_state(p_rc, RC_S2_MID) == E_OK)
     {
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
-        if (get_driver_cfg() == NOJMP_DRIVER)
-        {
-            local_ch4 = p_info->ch4;
-            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
-            pit_delta = -local_ch4 * 0.5f;
-            yaw_delta = -(float)p_info->ch3 * 0.0015f;
-        }
+        // if (get_driver_cfg() == NOJMP_DRIVER)
+        if (p_info->mouse.x != 0)
+            yaw_delta = -(p_info->mouse.x) * 0.012f;
         else
-        {
-            local_ch4 = p_info->ch4;
-            DEAD_ZONE(local_ch4, 660, PITCH_MOVE_DZ);
-            pit_delta = local_ch4 * 0.5f;              // left y
-            yaw_delta = -(float)p_info->ch1 * 0.0015f; // right x
-        }
+            yaw_delta = -(p_info->ch3) * 0.0015f;
 
-        if (rc_device_get_state(p_rc, RC_S2_UP) == E_OK)
-        {
-            yaw_delta += SPIN_OFFSET * GIMBAL_PERIOD;
-        }
+        if (p_info->mouse.y != 0)
+            pit_delta = p_info->mouse.y * 0.008f;
+        else 
+            pit_delta = -(p_info->ch4) * 0.0015f;
 
         gimbal_set_pitch_delta(p_gimbal, pit_delta);
         gimbal_set_yaw_delta(p_gimbal, yaw_delta);

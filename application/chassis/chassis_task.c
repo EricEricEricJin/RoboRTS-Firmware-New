@@ -30,11 +30,13 @@
 #include "appcfg.h"
 #include "log.h"
 
+#define CHASSIS_SPEED_FACTOR 0.3f
+
 struct pid_param chassis_motor_param =
     {
         .p = 6.5f,
         .i = 0.1f,
-        .max_out = 15000,
+        .max_out = 8000,
         .integral_limit = 500,
 };
 
@@ -85,11 +87,11 @@ void chassis_task(void const *argument)
 
     pid_struct_init(&pid_follow, MAX_CHASSIS_VW_SPEED, 50, 8.0f, 0.0f, 2.0f);
 
-    float local_ch3;
-
     double rotate_mat[2][2];
     double inv_rotate_mat[2][2];
     float vx_temp, vy_temp;
+
+    uint8_t is_spinning = FALSE;
 
     while (1)
     {
@@ -100,24 +102,34 @@ void chassis_task(void const *argument)
 
         chassis_gyro_updata(&chassis, chassis_gyro.yaw * RAD_TO_DEG, chassis_gyro.gz * RAD_TO_DEG);
 
-        log_i("rel_angle: %d", (int)follow_relative_angle);
-
         if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK || rc_device_get_state(&chassis_rc, RC_S2_MID) == E_OK)
         {
-            if (get_driver_cfg() == NOJMP_DRIVER)
-            {
-                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
-                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
-            }
-            else
-            {
-                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED; // left x
-                local_ch3 = p_rc_info->ch3;
-                DEAD_ZONE(local_ch3, 660, Y_MOVE_DZ);
-                vy = -local_ch3 * MAX_CHASSIS_VY_SPEED; // right y
-            }
+            // on,off spin
+            if (p_rc_info->kb.bit.Q)
+                is_spinning = TRUE;
+            else if (p_rc_info->kb.bit.E)
+                is_spinning = FALSE;
+            else if (rc_device_get_state(&chassis_rc, RC_S2_MID2UP) == E_OK)
+                is_spinning = TRUE;
+            else if (rc_device_get_state(&chassis_rc, RC_S2_UP2MID) == E_OK)
+                is_spinning = FALSE;
 
-            if (rc_device_get_state(&chassis_rc, RC_S2_UP) == E_OK)
+            // X,Y moving
+            if (p_rc_info->kb.bit.W)
+                vx = MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR;
+            else if (p_rc_info->kb.bit.S)
+                vx = -MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR;
+            else
+                vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+
+            if (p_rc_info->kb.bit.A)
+                vy = MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR;
+            else if (p_rc_info->kb.bit.D)
+                vy = -MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR;
+            else
+                vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+
+            if (is_spinning)
             {
                 wz = SPIN_SPEED;
                 rotate_mat[0][0] = cos((double)follow_relative_angle / RAD_TO_DEG);
@@ -130,17 +142,17 @@ void chassis_task(void const *argument)
                 vy_temp = inv_rotate_mat[1][0] * vx + inv_rotate_mat[1][1] * (-vy);
 
                 vx = vx_temp;
-                vy = -vy_temp;
+                vy = -vy_temp;           
             }
             else
             {
                 wz = -pid_calculate(&pid_follow, follow_relative_angle, 0);
             }
-
             chassis_set_offset(&chassis, ROTATE_X_OFFSET, ROTATE_Y_OFFSET);
             chassis_set_acc(&chassis, 0, 0, 0);
-            chassis_set_speed(&chassis, vx, vy, wz);
+            chassis_set_speed(&chassis, vx, vy, wz);        
         }
+
 
         if (rc_device_get_state(&chassis_rc, RC_S2_MID2DOWN) == E_OK)
         {
@@ -148,11 +160,11 @@ void chassis_task(void const *argument)
             chassis_set_acc(&chassis, 0, 0, 0);
         }
 
-        if (rc_device_get_state(&chassis_rc, RC_S2_MID2UP) == E_OK)
-        {
-            chassis_set_speed(&chassis, 0, 0, 0);
-            chassis_set_acc(&chassis, 0, 0, 0);
-        }
+        // if (rc_device_get_state(&chassis_rc, RC_S2_MID2UP) == E_OK)
+        // {
+        //     chassis_set_speed(&chassis, 0, 0, 0);
+        //     chassis_set_acc(&chassis, 0, 0, 0);
+        // }
 
         if (rc_device_get_state(&chassis_rc, RC_S2_DOWN) == E_OK)
         {
