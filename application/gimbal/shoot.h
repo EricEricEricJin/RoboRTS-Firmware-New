@@ -32,6 +32,10 @@
 #define FIRC_MAX_SPEED_PLUG 1620u
 #define FRIC_MIN_SPEED 1220u
 
+// #define FRIC_CAN_MAX_RPM_18 6000
+// #define FRIC_CAN_MAX_RPM_30 8000
+#define FRIC_CAN_RPM 8000
+
 #define BLOCK_CURRENT_DEFAULT 8800.0F
 #define BLOCK_SPEED_DEFAULT -1650
 #define BLOCK_TIMEOUT_DEFAULT 200
@@ -88,6 +92,10 @@ struct shoot
 
     struct motor_device motor;
     struct pid motor_pid;
+
+    struct motor_device fric_motor[2];
+    struct pid fric_pid[2];
+    int16_t fric_target_speed;
 };
 
 int32_t shoot_pid_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can, uint16_t can_id);
@@ -99,5 +107,10 @@ int32_t shoot_state_update(struct shoot *shoot);
 int32_t shoot_enable(struct shoot *shoot);
 int32_t shoot_disable(struct shoot *shoot);
 int32_t shoot_set_turn_speed(struct shoot *shoot, uint16_t speed);
+
+int32_t shoot_fric_wheel_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can, uint16_t can_id[2], int16_t on_current);
+void turn_on_can_fric(struct shoot* shoot);
+void turn_off_can_fric(struct shoot* shoot);
+void fric_pid_calc(struct shoot* shoot);
 
 #endif // __SHOOT_H__

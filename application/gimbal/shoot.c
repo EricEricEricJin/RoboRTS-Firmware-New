@@ -307,9 +307,9 @@ static int32_t shoot_fric_ctrl(struct shoot *shoot)
 
     shoot_get_fric_speed(shoot, &(shoot->fric_spd[0]), &(shoot->fric_spd[1]));
 
-    #define FRIC_SPEED_ADJ
-    
-    #ifndef FRIC_SPEED_ADJ
+#define FRIC_SPEED_ADJ
+
+#ifndef FRIC_SPEED_ADJ
 
     if (shoot->target.fric_spd[0] != shoot->fric_spd[0])
     {
@@ -334,12 +334,70 @@ static int32_t shoot_fric_ctrl(struct shoot *shoot)
         }
     }
 
-    #else
-        shoot->fric_spd[0] = shoot->target.fric_spd[0];
-        shoot->fric_spd[1] = shoot->target.fric_spd[1];
-    #endif
+#else
+    shoot->fric_spd[0] = shoot->target.fric_spd[0];
+    shoot->fric_spd[1] = shoot->target.fric_spd[1];
+#endif
 
     fric_set_output(shoot->fric_spd[0], shoot->fric_spd[1]);
 
     return E_OK;
+}
+
+int32_t shoot_fric_wheel_init(struct shoot *shoot, const char *name, struct pid_param param, enum device_can can, uint16_t can_id[2], int16_t on_current)
+{
+    char motor_name[2][OBJECT_NAME_MAX_LEN] = {0};
+    uint8_t name_len;
+    int32_t err;
+    device_assert(shoot != NULL);
+    name_len = strlen(name);
+
+    memcpy(&motor_name[0][name_len], "_CANFRIC0\0", 10);
+    memcpy(&motor_name[1][name_len], "_CANFRIC1\0", 10);
+    
+    for(int i = 0; i < 2; i++)
+    {
+        memcpy(&motor_name[i], name, name_len);
+        shoot->fric_motor[i].can_periph = can;
+        shoot->fric_motor[i].can_id = can_id[i];
+        shoot->fric_motor[i].init_offset_f = 1;
+
+        err = motor_register(&(shoot->fric_motor[i]), motor_name[i]);
+        if (err != E_OK)
+        {
+            goto end;
+        }
+    
+        pid_struct_init(&(shoot->fric_pid[i]), param.max_out, param.integral_limit, param.p, param.i, param.d);
+    }
+
+    return E_OK;
+end:
+    return err;
+}
+
+void turn_on_can_fric(struct shoot* shoot)
+{
+    shoot->fric_target_speed = FRIC_CAN_RPM;
+}
+
+void turn_off_can_fric(struct shoot* shoot)
+{
+    shoot->fric_target_speed = 0;
+}
+
+void fric_pid_calc(struct shoot* shoot)
+{
+    float motor_out;
+    motor_data_t pdata;
+
+    // motor 0
+    pdata = motor_get_data(&(shoot->fric_motor[0]));
+    motor_out = pid_calculate(&(shoot->fric_pid[0]), pdata->speed_rpm, shoot->fric_target_speed);
+    motor_set_current(&(shoot->fric_motor[0]), (int16_t)motor_out);
+
+    // motor 1
+    pdata = motor_get_data(&(shoot->fric_motor[1]));
+    motor_out = pid_calculate(&(shoot->fric_pid[1]), pdata->speed_rpm, -shoot->fric_target_speed);
+    motor_set_current(&(shoot->fric_motor[1]), (int16_t)motor_out);
 }
