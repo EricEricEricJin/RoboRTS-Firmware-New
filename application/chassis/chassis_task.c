@@ -30,7 +30,8 @@
 #include "appcfg.h"
 #include "log.h"
 
-#define CHASSIS_SPEED_FACTOR 0.3f
+#define CHASSIS_SPEED_FACTOR_NORMAL 0.3f
+#define CHASSIS_SPEED_FACTOR_BOOST 0.5f
 
 struct pid_param chassis_motor_param =
     {
@@ -116,18 +117,42 @@ void chassis_task(void const *argument)
 
             // X,Y moving
             if (p_rc_info->kb.bit.W)
-                vx = MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR;
+            {
+                if (p_rc_info->kb.bit.SHIFT)
+                    vx = MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR_BOOST;
+                else
+                    vx = MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR_NORMAL;
+            }
             else if (p_rc_info->kb.bit.S)
-                vx = -MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR;
+            {
+                if (p_rc_info->kb.bit.SHIFT)
+                    vx = -MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR_BOOST;
+                else
+                    vx = -MAX_CHASSIS_VX_SPEED * CHASSIS_SPEED_FACTOR_NORMAL;
+            }
             else
+            {
                 vx = (float)p_rc_info->ch2 / 660 * MAX_CHASSIS_VX_SPEED;
+            }
 
             if (p_rc_info->kb.bit.A)
-                vy = MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR;
+            {
+                if (p_rc_info->kb.bit.SHIFT)
+                    vy = MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR_BOOST;
+                else 
+                    vy = MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR_NORMAL;
+            }
             else if (p_rc_info->kb.bit.D)
-                vy = -MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR;
+            {
+                if (p_rc_info->kb.bit.SHIFT)
+                    vy = -MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR_BOOST;
+                else
+                    vy = -MAX_CHASSIS_VY_SPEED * CHASSIS_SPEED_FACTOR_NORMAL;
+            }
             else
+            {
                 vy = -(float)p_rc_info->ch1 / 660 * MAX_CHASSIS_VY_SPEED;
+            }
 
             if (is_spinning)
             {

@@ -330,12 +330,12 @@ void gimbal_normol_handle(struct gimbal *p_gimbal, struct rc_device *p_rc, struc
         gimbal_set_yaw_mode(p_gimbal, GYRO_MODE);
         // if (get_driver_cfg() == NOJMP_DRIVER)
         if (p_info->mouse.x != 0)
-            yaw_delta = -(p_info->mouse.x) * 0.012f;
+            yaw_delta = -(p_info->mouse.x) * 0.01f;
         else
             yaw_delta = -(p_info->ch3) * 0.0015f;
 
         if (p_info->mouse.y != 0)
-            pit_delta = p_info->mouse.y * 0.008f;
+            pit_delta = p_info->mouse.y * 0.004f;
         else 
             pit_delta = -(p_info->ch4) * 0.0015f;
 
